@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Job {
+  id          Int           @id @default(autoincrement())
+  companyName String
+  location    String?
+  title       String
+  description String?
+  salary      String?
+  postedDate  DateTime?
+  expireDate  DateTime?
+  url         String        @unique
+  Application Application[]
+
+  @@map("jobs") // keeps table name as 'jobs' to match your original
+}
+
+model Application {
+  id          Int      @id @default(autoincrement())
+  jobId       Int
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  fullName    String
+  email       String
+  phone       String?
+  linkedin    String?
+  github      String?
+  portfolio   String?
+  coverLetter String?
+  resumeUrl   String
+  createdAt   DateTime @default(now())
+
+  @@unique([jobId, email], name: "uniq_job_email") // block duplicate applies per job/email
+}

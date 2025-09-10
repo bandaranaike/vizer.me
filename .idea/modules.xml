@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../api.vizer.me/.idea/api.vizer.me.iml" filepath="$PROJECT_DIR$/../api.vizer.me/.idea/api.vizer.me.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../db.vizer.me/.idea/db.vizer.me.iml" filepath="$PROJECT_DIR$/../db.vizer.me/.idea/db.vizer.me.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../scraper.vizer.me/.idea/scraper.vizer.me.iml" filepath="$PROJECT_DIR$/../scraper.vizer.me/.idea/scraper.vizer.me.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/vizer.me.iml" filepath="$PROJECT_DIR$/.idea/vizer.me.iml" />
     </modules>
   </component>

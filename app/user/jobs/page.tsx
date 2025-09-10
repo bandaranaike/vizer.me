@@ -2,6 +2,7 @@
 
 import {useEffect, useState} from 'react'
 import axios from 'axios'
+import JobCreatePopup from "@/components/jobs/JobCreatePopup";
 
 type JobStatus =
     | 'No response'
@@ -33,7 +34,10 @@ export default function JobsPage() {
 
     return (
         <div className="max-w-7xl mx-auto p-6 mt-18 space-y-6 text-gray-800 dark:text-gray-100">
-            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Applied Jobs</h2>
+            <div className="flex justify-between">
+                <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Applied Jobs</h2>
+                <JobCreatePopup/>
+            </div>
             <div className="overflow-x-auto rounded-xl border dark:border-gray-700">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
