@@ -161,7 +161,7 @@ export default function JobDisplay() {
                                 </div>
                                 <div className="grow-0">
                                     <ApplyJobDialog jobId={selectedJob.id} jobTitle={selectedJob.title}
-                                                    applyUrl={`/api/jobs/${selectedJob.id}/apply`}/>
+                                                    applyUrl={`/api/jobs/apply`}/>
                                 </div>
                             </div>
                             <div className="prose dark:prose-invert max-w-none">

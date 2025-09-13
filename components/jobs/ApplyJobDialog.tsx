@@ -1,8 +1,8 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {z} from "zod";
-import {useForm} from "react-hook-form";
+import {Controller, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Loader2, Briefcase} from "lucide-react";
 
@@ -29,6 +29,13 @@ import {
 } from "@/components/ui/dialog";
 import {Toaster} from "@/components/ui/sonner";
 import {toast} from "sonner";
+const MAX_RESUME_BYTES = 5 * 1024 * 1024;
+
+const ResumeFileSchema = z
+    .instanceof(File, { message: "Resume is required" })
+    .refine((f) => f.size > 0, "Resume is required")
+    .refine((f) => f.size <= MAX_RESUME_BYTES, "Resume file is too large (max 5MB).")
+    .refine((f) => f.type === "application/pdf", "Resume must be a PDF");
 
 // --- Schema ---
 const ApplicationSchema = z.object({
@@ -39,12 +46,11 @@ const ApplicationSchema = z.object({
     github: z.string().url("Must be a valid URL").optional().or(z.literal("")),
     portfolio: z.string().url("Must be a valid URL").optional().or(z.literal("")),
     coverLetter: z.string().optional(),
+    resume: ResumeFileSchema
     // We'll validate resume on submit since File cannot be represented well in zod here
 });
 
-export type ApplicationValues = z.infer<typeof ApplicationSchema> & {
-    resume?: File | null;
-};
+export type ApplicationValues = z.infer<typeof ApplicationSchema>;
 
 // --- Component ---
 export default function ApplyJobDialog(
@@ -76,12 +82,16 @@ export default function ApplyJobDialog(
         mode: "onBlur",
     });
 
+    useEffect(() => {
+        form.register("resume");             // <-- register the field name once
+    }, [form])
+
     async function onSubmit(values: ApplicationValues) {
         try {
             setLoading(true);
 
             // Manual validation for resume file
-            const resume: File | null | undefined = values.resume as any;
+            const resume: File | null | undefined = values.resume;
             if (!resume) {
                 toast.error("Please attach your resume (PDF up to 5MB).");
                 return;
@@ -155,7 +165,7 @@ export default function ApplyJobDialog(
 
                         {/* Form */}
                         <div className="p-6">
-                            <Form {...(form as any)}>
+                            <Form {...(form)}>
                                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                                         <FormField
@@ -272,21 +282,24 @@ export default function ApplyJobDialog(
                                     />
 
                                     {/* Resume upload (PDF) */}
-                                    <FormItem>
-                                        <FormLabel>Resume (PDF, max 5MB)</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="file"
-                                                accept="application/pdf"
-                                                className="bg-white"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0] ?? null;
-                                                    (form as any).setValue("resume", file, {shouldValidate: false});
-                                                }}
-                                            />
-                                        </FormControl>
-                                        <FormMessage/>
-                                    </FormItem>
+
+                                    <Controller
+                                        name="resume"
+                                        control={form.control}
+                                        render={({ field, fieldState }) => (
+                                            <FormItem>
+                                                <FormLabel>Resume (PDF, max 5MB)</FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".pdf,application/pdf"
+                                                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage>{fieldState.error?.message}</FormMessage>
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     <div className="flex items-center justify-end gap-3 pt-2">
                                         <DialogClose asChild>
