@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -14,25 +8,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        Int      @id @default(autoincrement())
+  fullName  String
+  email     String   @unique
+  password  String
+  phone     String?
+  linkedin  String?
+  github    String?
+  portfolio String?
+  createdAt DateTime @default(now())
+
+  // Relationships
+  companies    Company[] // companies this user owns
+  applications Application[] // jobs this user applied to
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  logo      String
+  createdAt DateTime @default(now())
+
+  // Relations
+  ownerId Int
+  owner   User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  jobs    Job[]
+
+  @@index([ownerId])
+}
+
 model Job {
-  id          Int           @id @default(autoincrement())
-  companyName String
-  location    String?
+  id          Int       @id @default(autoincrement())
   title       String
   description String?
+  location    String?
   salary      String?
-  postedDate  DateTime?
+  postedDate  DateTime  @default(now())
   expireDate  DateTime?
-  url         String        @unique
-  Application Application[]
+  url         String    @unique
 
-  @@map("jobs") // keeps table name as 'jobs' to match your original
+  // Relations
+  companyId    Int
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@index([companyId])
 }
 
 model Application {
   id          Int      @id @default(autoincrement())
-  jobId       Int
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   fullName    String
   email       String
   phone       String?
@@ -43,6 +69,12 @@ model Application {
   resumeUrl   String
   createdAt   DateTime @default(now())
 
-  @@map("applications")
-  @@unique([jobId, email], name: "uniq_job_email") // block duplicate applies per job/email
+  // Relations
+  jobId  Int
+  job    Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId], name: "uniq_job_user") // user can apply once per job
+  @@index([jobId, userId])
 }

@@ -1,13 +1,13 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {formatDistanceToNow} from 'date-fns';
 import {
     ClockIcon,
     MapPinIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import {Button} from '@/components/ui/button';
 import ApplyJobDialog from "@/components/jobs/ApplyJobDialog";
+import axios from "axios";
 
 type Job = {
     id: number;
@@ -23,7 +23,7 @@ type Job = {
     fullDescription: string;
 };
 
-const jobs: Job[] = [
+const jobs_b: Job[] = [
     {
         id: 1,
         companyLogo: '/company-logo.jpg',
@@ -105,22 +105,31 @@ const jobs: Job[] = [
     // Add more jobs as needed
 ];
 
+
+
 export default function JobDisplay() {
-    const [selectedJob, setSelectedJob] = useState<Job>(jobs[0]);
+    const [selectedJob, setSelectedJob] = useState<Job>();
+    const [jobs, setJobs] = useState<Job[]>();
+
+    useEffect(() => {
+        axios.get('/api/jobs').then(r=>{
+            setJobs(r.data)
+        })
+    }, [])
 
     return (
         <div
             className="max-w-7xl mx-auto border border-gray-200 dark:border-gray-700 rounded-xl flex bg-white dark:bg-gray-900 font-[family-name:var(--font-geist-sans)]">
             {/* Job List */}
             <div className="w-1/3 overflow-y-auto border-r border-gray-200 dark:border-gray-700">
-                {jobs.map((job) => (
+                {jobs && jobs.map((job) => (
                     <div
                         key={job.id}
                         onClick={() => setSelectedJob(job)}
                         className={clsx('cursor-pointer p-4 border-b border-gray-200',
                             'dark:border-gray-700 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700',
                             'transition last:border-none first:rounded-tl-xl last:rounded-bl-xl',
-                            selectedJob.id === job.id ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-900')}
+                            selectedJob && selectedJob.id === job.id ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-900')}
                     >
                         <div className="flex items-center gap-3">
                             <img src={job.companyLogo} alt="Logo" className="w-10 h-10 rounded-full"/>
@@ -131,7 +140,7 @@ export default function JobDisplay() {
                         </div>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
                             <ClockIcon className="w-4 h-4"/>
-                            <span>{formatDistanceToNow(job.createdAt)} ago</span>
+                            <span>{job.createdAt && formatDistanceToNow(job.createdAt)} ago</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
                             <MapPinIcon className="w-4 h-4"/>

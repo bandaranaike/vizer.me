@@ -5,7 +5,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="api.vizer.me" />
-    <orderEntry type="module" module-name="db.vizer.me" />
     <orderEntry type="module" module-name="scraper.vizer.me" />
   </component>
 </module>
