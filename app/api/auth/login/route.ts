@@ -7,15 +7,38 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function POST(req: Request) {
     try {
-        const { email, password } = await req.json();
+        const { identifier, password } = await req.json();
 
-        const user = await prisma.user.findUnique({ where: { email } });
+        if (!identifier || !password) {
+            return NextResponse.json(
+                { error: 'Email or username and password are required' },
+                { status: 400 }
+            );
+        }
+
+        const normalized = String(identifier).trim();
+
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: { equals: normalized, mode: 'insensitive' } },
+                    { username: { equals: normalized, mode: 'insensitive' } },
+                ],
+            },
+        });
+
         if (!user)
-            return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+            return NextResponse.json(
+                { error: 'Invalid credentials' },
+                { status: 401 }
+            );
 
         const valid = await bcrypt.compare(password, user.password);
         if (!valid)
-            return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+            return NextResponse.json(
+                { error: 'Invalid credentials' },
+                { status: 401 }
+            );
 
         const token = jwt.sign(
             { id: user.id, email: user.email },
@@ -23,8 +46,14 @@ export async function POST(req: Request) {
             { expiresIn: '7d' }
         );
 
-        const res = NextResponse.json({ message: 'Login successful', token, user });
-        res.cookies.set('token', token, { httpOnly: true, path: '/' });
+        const { password: _password, ...safeUser } = user;
+
+        const res = NextResponse.json({ message: 'Login successful', token, user: safeUser });
+        res.cookies.set('token', token, {
+            httpOnly: true,
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+        });
 
         return res;
     } catch (error) {
