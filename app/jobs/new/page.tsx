@@ -42,8 +42,36 @@ export default function NewJobPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [companies, setCompanies] = useState<Company[]>([]);
+    const [checkingAuth, setCheckingAuth] = useState(true);
 
     // ✅ Load companies for suggestions
+    useEffect(() => {
+        async function ensureAuthenticated() {
+            try {
+                const res = await fetch("/api/auth/me", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                    cache: "no-store",
+                });
+
+                if (!res.ok) {
+                    toast.error("Please sign in to create a job.");
+                    router.replace("/");
+                    return;
+                }
+            } catch (error) {
+                console.error("Failed to verify authentication", error);
+                toast.error("Unable to verify your session. Please sign in again.");
+                router.replace("/");
+                return;
+            }
+
+            setCheckingAuth(false);
+        }
+
+        ensureAuthenticated();
+    }, [router]);
+
     useEffect(() => {
         async function loadCompanies() {
             try {
@@ -56,8 +84,10 @@ export default function NewJobPage() {
                 toast.error("Unable to load companies. Please check connection.");
             }
         }
-        loadCompanies();
-    }, []);
+        if (!checkingAuth) {
+            loadCompanies();
+        }
+    }, [checkingAuth]);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(FormSchema),
@@ -130,6 +160,17 @@ export default function NewJobPage() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (checkingAuth) {
+        return (
+            <div className="mx-auto max-w-2xl p-6 text-gray-900 mt-20">
+                <Toaster />
+                <div className="flex items-center justify-center py-24">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                </div>
+            </div>
+        );
     }
 
     return (

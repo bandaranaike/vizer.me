@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { getAuthenticatedUser } from "@/lib/auth";
 
 const JobSchema = z.object({
     companyId: z.number().int().positive("Company ID is required"), // must exist
@@ -23,6 +24,12 @@ function isPrismaKnownError(e: unknown): e is PrismaKnownErrorLike {
 
 export async function POST(req: Request) {
     try {
+        const user = await getAuthenticatedUser();
+
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const json = await req.json();
         const parsed = JobSchema.parse(json);
 
