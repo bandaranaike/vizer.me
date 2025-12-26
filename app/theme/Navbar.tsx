@@ -6,11 +6,11 @@ import {useRouter} from 'next/navigation';
 import {useTheme} from 'next-themes';
 import {Auth} from '@/components/Auth';
 import {
-  buildUserHeaders,
-  clearStoredUser,
-  loadStoredUser,
-  saveStoredUser,
-  StoredUser,
+    buildUserHeaders,
+    clearStoredUser,
+    loadStoredUser,
+    saveStoredUser,
+    StoredUser,
 } from '@/lib/auth-storage';
 
 export default function Navbar() {
@@ -77,7 +77,7 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 left-0 w-full z-50 transition-transform duration-300 font-[family-name:var(--font-geist-sans)] ${
+            className={`fixed top-0 left-0 w-full z-50 transition-transform duration-300 font-(family-name:--font-geist-sans) ${
                 show ? 'translate-y-0' : '-translate-y-full'
             } border-b border-gray-200 dark:border-gray-900 bg-white dark:bg-black shadow-md`}
         >

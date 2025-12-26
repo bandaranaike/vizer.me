@@ -14,8 +14,8 @@ type Job = {
     id: number;
     companyLogo: string;
     title: string;
-    company: string;
-    createdAt: Date;
+    company: Company;
+    postedDate: Date;
     address: string;
     shortDesc: string;
     requirements: string;
@@ -24,89 +24,12 @@ type Job = {
     fullDescription: string;
 };
 
-const jobs_b: Job[] = [
-    {
-        id: 1,
-        companyLogo: '/company-logo.jpg',
-        title: 'Senior Software Engineer',
-        company: 'Tech Corp',
-        createdAt: new Date(Date.now() - 3600 * 1000), // 1 hour ago
-        address: 'Colombo, Sri Lanka',
-        shortDesc: 'Develop and maintain enterprise-grade applications.',
-        requirements: '5+ years experience, Laravel, Node.js',
-        qualifications: 'BSc in Computer Science',
-        salary: '$3000 - $4000',
-        fullDescription: 'Full job description goes here...',
-    },
-    {
-        id: 2,
-        companyLogo: '/company-logo.jpg',
-        title: 'Full Stack Developer (React/Node.js)',
-        company: 'Innovate Solutions',
-        createdAt: new Date(Date.now() - 2 * 24 * 3600 * 1000), // 2 days ago
-        address: 'Kandy, Sri Lanka',
-        shortDesc: 'Building modern web applications with React and Node.js.',
-        requirements: '3+ years experience, React, Node.js, Express.js, MySQL',
-        qualifications: 'Degree in IT or related field',
-        salary: '$2500 - $3500',
-        fullDescription: 'Join our dynamic team to build cutting-edge web solutions. Experience with REST APIs and microservices is a plus.',
-    },
-    {
-        id: 3,
-        companyLogo: '/company-logo.jpg',
-        title: 'Cloud Engineer (AWS)',
-        company: 'CloudXperts',
-        createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000), // 5 days ago
-        address: 'Galle, Sri Lanka',
-        shortDesc: 'Design, implement, and manage AWS cloud infrastructure.',
-        requirements: '4+ years experience, AWS (EC2, S3, RDS, Lambda), Docker, Kubernetes',
-        qualifications: 'BSc in Software Engineering or AWS Certified',
-        salary: '$3500 - $5000',
-        fullDescription: 'Seeking an experienced Cloud Engineer to manage and optimize our AWS environments. Strong scripting skills (Python/Bash) preferred.',
-    },
-    {
-        id: 4,
-        companyLogo: '/company-logo.jpg',
-        title: 'Backend Developer (Node.js/Express)',
-        company: 'NextGen Tech',
-        createdAt: new Date(Date.now() - 12 * 3600 * 1000), // 12 hours ago
-        address: 'Colombo, Sri Lanka',
-        shortDesc: 'Develop scalable backend services and APIs.',
-        requirements: '2+ years experience, Node.js, Express.js, MongoDB, API Design',
-        qualifications: 'Relevant certifications or proven experience',
-        salary: '$2000 - $3000',
-        fullDescription: 'We are looking for a passionate Backend Developer to join our growing team. Familiarity with microservices architecture is a bonus.',
-    },
-    {
-        id: 5,
-        companyLogo: '/company-logo.jpg',
-        title: 'PHP Laravel Developer',
-        company: 'Data Systems LK',
-        createdAt: new Date(Date.now() - 7 * 24 * 3600 * 1000), // 7 days ago
-        address: 'Jaffna, Sri Lanka',
-        shortDesc: 'Maintain and enhance existing Laravel applications.',
-        requirements: '3+ years experience, PHP, Laravel, MySQL, Vue.js (optional)',
-        qualifications: 'BSc in Computer Science or equivalent',
-        salary: '$2200 - $3200',
-        fullDescription: 'Opportunity for an experienced Laravel developer to work on diverse projects. Good understanding of MVC patterns and RESTful APIs required.',
-    },
-    {
-        id: 6,
-        companyLogo: '/company-logo.jpg',
-        title: 'Google Cloud Platform (GCP) Architect',
-        company: 'GCP Professionals Inc.',
-        createdAt: new Date(Date.now() - 3 * 24 * 3600 * 1000), // 3 days ago
-        address: 'Colombo, Sri Lanka',
-        shortDesc: 'Lead the design and implementation of solutions on GCP.',
-        requirements: '5+ years experience, GCP (Compute Engine, GKE, Cloud SQL, BigQuery), Terraform',
-        qualifications: 'Google Cloud Certified - Professional Cloud Architect preferred',
-        salary: '$4000 - $6000',
-        fullDescription: 'Exciting role for a seasoned GCP Architect to drive cloud adoption and strategy. Experience with CI/CD pipelines is highly desirable.',
-    },
-    // Add more jobs as needed
-];
-
-
+type Company = {
+    id: number;
+    name: string;
+    logo: string;
+    address: string;
+}
 
 export default function JobDisplay() {
     const [selectedJob, setSelectedJob] = useState<Job>();
@@ -116,7 +39,9 @@ export default function JobDisplay() {
         axios.get('/api/jobs', {
             headers: buildUserHeaders(),
         }).then(r => {
+            console.log(r.data)
             setJobs(r.data)
+            setSelectedJob(r.data[0])
         })
     }, [])
 
@@ -135,19 +60,19 @@ export default function JobDisplay() {
                             selectedJob && selectedJob.id === job.id ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-900')}
                     >
                         <div className="flex items-center gap-3">
-                            <img src={job.companyLogo} alt="Logo" className="w-10 h-10 rounded-full"/>
+                            <img src={job.company.logo} alt="Logo" className="w-10 h-10 rounded-full"/>
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{job.title}</h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">{job.company}</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{job.company.name}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
                             <ClockIcon className="w-4 h-4"/>
-                            <span>{job.createdAt && formatDistanceToNow(job.createdAt)} ago</span>
+                            <span>{job.postedDate && formatDistanceToNow(job.postedDate)} ago</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1 text-sm text-gray-500 dark:text-gray-400">
                             <MapPinIcon className="w-4 h-4"/>
-                            <span>{job.address}</span>
+                            <span>{job.company.address}</span>
                         </div>
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{job.shortDesc}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -166,10 +91,10 @@ export default function JobDisplay() {
                     {selectedJob && (
                         <div className="text-gray-800 dark:text-white">
                             <div className="flex">
-                                <div className="grow-1">
+                                <div className="grow">
                                     <h2 className="text-2xl font-bold mb-2">{selectedJob.title}</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedJob.company} • {selectedJob.address}</p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Posted {formatDistanceToNow(selectedJob.createdAt)} ago</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedJob.company.name} • {selectedJob.address}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Posted {formatDistanceToNow(selectedJob.postedDate)} ago</p>
                                 </div>
                                 <div className="grow-0">
                                     <ApplyJobDialog jobId={selectedJob.id} jobTitle={selectedJob.title}

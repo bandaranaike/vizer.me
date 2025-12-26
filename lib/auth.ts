@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
+import {cookies} from 'next/headers';
 import jwt from 'jsonwebtoken';
-import { prisma } from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -12,7 +12,7 @@ type TokenPayload = {
 };
 
 export async function getAuthenticatedUser() {
-    const token = cookies().get('token')?.value;
+    const token = (await cookies()).get('token')?.value;
 
     if (!token) {
         return null;
@@ -25,8 +25,8 @@ export async function getAuthenticatedUser() {
             return null;
         }
 
-        const user = await prisma.user.findUnique({
-            where: { id: decoded.id },
+        return await prisma.user.findUnique({
+            where: {id: decoded.id},
             select: {
                 id: true,
                 email: true,
@@ -35,8 +35,6 @@ export async function getAuthenticatedUser() {
                 createdAt: true,
             },
         });
-
-        return user;
     } catch (error) {
         console.error('Failed to verify auth token', error);
         return null;

@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import {cn} from '@/lib/utils';
 import {saveStoredUser} from '@/lib/auth-storage';
+import {GithubOutlined, GoogleOutlined} from "@ant-design/icons";
 
 interface AuthFormProps
     extends React.HTMLAttributes<HTMLButtonElement | HTMLDivElement> {
