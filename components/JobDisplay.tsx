@@ -8,6 +8,7 @@ import {
 import clsx from 'clsx';
 import ApplyJobDialog from "@/components/jobs/ApplyJobDialog";
 import axios from "axios";
+import {buildUserHeaders} from '@/lib/auth-storage';
 
 type Job = {
     id: number;
@@ -112,7 +113,9 @@ export default function JobDisplay() {
     const [jobs, setJobs] = useState<Job[]>();
 
     useEffect(() => {
-        axios.get('/api/jobs').then(r=>{
+        axios.get('/api/jobs', {
+            headers: buildUserHeaders(),
+        }).then(r => {
             setJobs(r.data)
         })
     }, [])

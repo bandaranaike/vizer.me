@@ -18,8 +18,8 @@ import {
     LockClosedIcon,
     UserIcon,
 } from '@heroicons/react/24/outline';
-import {GoogleOutlined, GithubOutlined} from '@ant-design/icons';
 import {cn} from '@/lib/utils';
+import {saveStoredUser} from '@/lib/auth-storage';
 
 interface AuthFormProps
     extends React.HTMLAttributes<HTMLButtonElement | HTMLDivElement> {
@@ -98,7 +98,6 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
         setError('');
         try {
             const endpoint = identifierExists ? '/api/auth/login' : '/api/auth/register';
-            console.log('endpoint', endpoint);
             const payload = identifierExists
                 ? {identifier: identifier.trim(), password}
                 : {
@@ -129,6 +128,9 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                 return;
             }
 
+            if (data?.user) {
+                saveStoredUser(data.user);
+            }
             router.refresh();
             setIsOpen(false);
             resetForm();

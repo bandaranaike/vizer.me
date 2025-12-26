@@ -7,6 +7,7 @@ import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Loader2} from "lucide-react";
 import { debounce } from "lodash";
+import {buildUserHeaders} from "@/lib/auth-storage";
 
 
 interface Company {
@@ -58,7 +59,9 @@ export default function JobCreatePopup({userId, onSubmit}: Props) {
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const res = await fetch(`/api/companies?userId=${userId}`);
+                const res = await fetch(`/api/companies?userId=${userId}`, {
+                    headers: buildUserHeaders(),
+                });
                 const data = await res.json();
                 setCompanies(data);
             } catch (error) {

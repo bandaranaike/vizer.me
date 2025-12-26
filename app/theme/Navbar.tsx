@@ -2,13 +2,23 @@
 
 import {useEffect, useState} from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import {useTheme} from 'next-themes';
 import {Auth} from '@/components/Auth';
+import {
+  buildUserHeaders,
+  clearStoredUser,
+  loadStoredUser,
+  saveStoredUser,
+  StoredUser,
+} from '@/lib/auth-storage';
 
 export default function Navbar() {
     const [show, setShow] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
+    const [user, setUser] = useState<StoredUser | null>(loadStoredUser());
     const {theme} = useTheme();
+    const router = useRouter();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -20,6 +30,50 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [lastScrollY]);
+
+    useEffect(() => {
+        async function hydrateUser() {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...buildUserHeaders(),
+                    },
+                    cache: 'no-store',
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data?.user) {
+                        setUser(data.user);
+                        saveStoredUser(data.user);
+                    }
+                } else {
+                    setUser(null);
+                    clearStoredUser();
+                }
+            } catch (error) {
+                console.error('Failed to load user', error);
+            }
+        }
+
+        hydrateUser();
+    }, []);
+
+    const handleSignOut = async () => {
+        try {
+            await fetch('/api/auth/logout', {method: 'POST'});
+        } catch (error) {
+            console.error('Failed to log out', error);
+        } finally {
+            clearStoredUser();
+            setUser(null);
+            router.push('/');
+        }
+    };
+
+    const displayName = user?.fullName || user?.username || user?.email;
 
     return (
         <nav
@@ -35,13 +89,26 @@ export default function Navbar() {
                         <img src="/logo-dark.png" alt="Logo Light" className="h-10"/>
                     )}
                 </Link>
-                <div className="space-x-4 text-sm">
+                <div className="flex items-center gap-4 text-sm">
                     <Link href="/jobs/new" className="text-gray-800 dark:text-gray-200 hover:underline">
                         Create Job
                     </Link>
-                    <Link href="#" className="text-gray-800 dark:text-gray-200 hover:underline">
+                    {user ? (
+                        <>
+                            <Link href="/user" className="text-gray-800 dark:text-gray-200 hover:underline">
+                                {displayName}
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={handleSignOut}
+                                className="text-gray-800 dark:text-gray-200 hover:underline"
+                            >
+                                Sign out
+                            </button>
+                        </>
+                    ) : (
                         <Auth/>
-                    </Link>
+                    )}
                 </div>
             </div>
         </nav>
