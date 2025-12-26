@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from 'react';
+import React from 'react';
 import {useRouter} from 'next/navigation';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -49,7 +49,7 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
         setIsLoading(false);
     }, [initialEmail]);
 
-    // 🧠 Check if identifier already exists in DB
+    // 🧠 Check if the identifier already exists in DB
     const checkIdentifierExists = React.useCallback(
         async (value: string) => {
             const trimmed = value.trim();
@@ -61,7 +61,8 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                 const res = await fetch('/api/auth/check-email', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({identifier: trimmed}),
+                    body: JSON.stringify({identifier:
+                        trimmed}),
                 });
                 const data = await res.json();
 
@@ -97,14 +98,15 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
         setError('');
         try {
             const endpoint = identifierExists ? '/api/auth/login' : '/api/auth/register';
+            console.log('endpoint', endpoint);
             const payload = identifierExists
                 ? {identifier: identifier.trim(), password}
                 : {
-                      email: registerEmail.trim(),
-                      username: username.trim(),
-                      fullName: fullName.trim(),
-                      password,
-                  };
+                    email: registerEmail.trim(),
+                    username: username.trim(),
+                    fullName: fullName.trim(),
+                    password,
+                };
 
             if (!identifierExists) {
                 if (!payload.email || !payload.username || !fullName.trim()) {
@@ -137,10 +139,9 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
         }
     }, [identifierExists, identifier, password, registerEmail, username, fullName, router, resetForm]);
 
-    const handleIdentifierSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleIdentifierSubmit = () => {
         if (identifier.trim()) {
-            checkIdentifierExists(identifier);
+            checkIdentifierExists(identifier).then(r => console.log(r));
         }
     };
 
@@ -157,7 +158,7 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
     return (
         <Dialog
             open={isOpen}
-            onOpenChange={(open) => {
+            onOpenChange={(open: boolean) => {
                 setIsOpen(open);
                 if (!open) resetForm();
             }}
@@ -168,7 +169,7 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-106.25">
                 <DialogHeader>
                     <DialogTitle>
                         {identifierExists === null
@@ -184,7 +185,7 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                     <div>
                         {identifierExists === null ? (
                             // STEP 1: Ask for identifier
-                            <form className="grid gap-4" onSubmit={handleIdentifierSubmit}>
+                            <form className="grid gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="identifier">Email or Username</Label>
                                     <div className="relative">
@@ -206,7 +207,8 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                                 </div>
                                 {error && <div className="text-red-500 text-sm -my-2">{error}</div>}
                                 <Button
-                                    type="submit"
+                                    type="button"
+                                    onClick={handleIdentifierSubmit}
                                     disabled={isLoading || !identifier.trim()}
                                 >
                                     {isLoading && (
@@ -307,6 +309,7 @@ export function Auth({className, initialEmail = '', ...props}: AuthFormProps) {
                                         Use a different email or username
                                     </Button>
                                     <Button
+                                        type="button"
                                         onClick={loginOrRegister}
                                         disabled={
                                             isLoading ||
