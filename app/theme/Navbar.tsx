@@ -17,7 +17,7 @@ import {
 export default function Navbar() {
     const [show, setShow] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
-    const [user, setUser] = useState<StoredUser | null>(loadStoredUser());
+    const [user, setUser] = useState<StoredUser | null>(null);
     const {theme} = useTheme();
     const router = useRouter();
 
@@ -37,6 +37,7 @@ export default function Navbar() {
             setUser(loadStoredUser());
         };
 
+        handleAuthChange();
         window.addEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
         return () => window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
     }, []);
