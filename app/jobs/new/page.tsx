@@ -6,6 +6,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Briefcase } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,6 +107,8 @@ export default function NewJobPage() {
         },
         mode: "onBlur",
     });
+
+    const descriptionPreview = form.watch("description");
 
     async function onSubmit(values: FormValues) {
         try {
@@ -238,15 +242,28 @@ export default function NewJobPage() {
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description (optional)</FormLabel>
+                                    <FormLabel>Description (Markdown supported)</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Role summary, responsibilities, requirements..."
+                                            placeholder="Use Markdown for headings, lists, and links"
                                             className="min-h-32 bg-white"
                                             {...field}
                                         />
                                     </FormControl>
+                                    <p className="text-xs text-gray-500">
+                                        Examples: `## Overview`, `- bullet`, `[Link](https://example.com)`
+                                    </p>
                                     <FormMessage />
+                                    <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3">
+                                        <p className="mb-2 text-xs font-semibold text-gray-600">
+                                            Live preview
+                                        </p>
+                                        <div className="prose prose-sm max-w-none text-gray-900">
+                                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                {descriptionPreview || "*Start typing to see the preview*"}
+                                            </ReactMarkdown>
+                                        </div>
+                                    </div>
                                 </FormItem>
                             )}
                         />

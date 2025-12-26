@@ -6,6 +6,8 @@ import {
     MapPinIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import ApplyJobDialog from "@/components/jobs/ApplyJobDialog";
 import axios from "axios";
 import {buildUserHeaders} from '@/lib/auth-storage';
@@ -21,7 +23,7 @@ type Job = {
     requirements: string;
     qualifications: string;
     salary: string;
-    description: string;
+    description?: string | null;
 };
 
 type Company = {
@@ -102,7 +104,9 @@ export default function JobDisplay() {
                                 </div>
                             </div>
                             <div className="prose dark:prose-invert max-w-none">
-                                <p>{selectedJob.description}</p>
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {selectedJob.description || ""}
+                                </ReactMarkdown>
                             </div>
                         </div>
                     )}
