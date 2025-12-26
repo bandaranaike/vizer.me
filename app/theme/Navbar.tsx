@@ -11,6 +11,7 @@ import {
     loadStoredUser,
     saveStoredUser,
     StoredUser,
+    AUTH_CHANGE_EVENT,
 } from '@/lib/auth-storage';
 
 export default function Navbar() {
@@ -30,6 +31,15 @@ export default function Navbar() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, [lastScrollY]);
+
+    useEffect(() => {
+        const handleAuthChange = () => {
+            setUser(loadStoredUser());
+        };
+
+        window.addEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
+        return () => window.removeEventListener(AUTH_CHANGE_EVENT, handleAuthChange);
+    }, []);
 
     useEffect(() => {
         async function hydrateUser() {

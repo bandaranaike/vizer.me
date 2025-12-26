@@ -4,7 +4,7 @@ import { z } from "zod";
 import { getAuthenticatedUser } from "@/lib/auth";
 
 const JobSchema = z.object({
-    companyId: z.number().int().positive("Company ID is required"), // must exist
+    companyName: z.string().min(1, "Company name is required"),
     title: z.string().min(1, "Title is required"),
     description: z.string().optional().nullable(),
     location: z.string().optional().nullable(),
@@ -33,32 +33,41 @@ export async function POST(req: Request) {
         const json = await req.json();
         const parsed = JobSchema.parse(json);
 
-        // Ensure company exists before creating job
-        const company = await prisma.company.findUnique({
-            where: { id: parsed.companyId },
-        });
+        const job = await prisma.$transaction(async (tx) => {
+            const existingCompany = await tx.company.findFirst({
+                where: {
+                    name: {
+                        equals: parsed.companyName,
+                        mode: "insensitive",
+                    },
+                },
+            });
 
-        if (!company) {
-            return NextResponse.json(
-                { error: "Company not found" },
-                { status: 404 }
-            );
-        }
+            const company =
+                existingCompany ||
+                (await tx.company.create({
+                    data: {
+                        name: parsed.companyName,
+                        ownerId: user.id,
+                        logo: "company-logo.jpg",
+                    },
+                }));
 
-        const job = await prisma.job.create({
-            data: {
-                companyId: parsed.companyId,
-                title: parsed.title,
-                description: parsed.description || null,
-                location: parsed.location || null,
-                salary: parsed.salary || null,
-                postedDate: new Date(),
-                expireDate: parsed.expireDate ? new Date(parsed.expireDate) : null,
-                url: parsed.url,
-            },
-            include: {
-                company: true, // include company info for convenience
-            },
+            return tx.job.create({
+                data: {
+                    companyId: company.id,
+                    title: parsed.title,
+                    description: parsed.description || null,
+                    location: parsed.location || null,
+                    salary: parsed.salary || null,
+                    postedDate: new Date(),
+                    expireDate: parsed.expireDate ? new Date(parsed.expireDate) : null,
+                    url: parsed.url,
+                },
+                include: {
+                    company: true, // include company info for convenience
+                },
+            });
         });
 
         return NextResponse.json(job, { status: 201 });

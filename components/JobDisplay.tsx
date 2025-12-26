@@ -21,7 +21,7 @@ type Job = {
     requirements: string;
     qualifications: string;
     salary: string;
-    fullDescription: string;
+    description: string;
 };
 
 type Company = {
@@ -93,7 +93,7 @@ export default function JobDisplay() {
                             <div className="flex">
                                 <div className="grow">
                                     <h2 className="text-2xl font-bold mb-2">{selectedJob.title}</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedJob.company.name} • {selectedJob.address}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedJob.company.name} • {selectedJob.company.address}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Posted {formatDistanceToNow(selectedJob.postedDate)} ago</p>
                                 </div>
                                 <div className="grow-0">
@@ -102,7 +102,7 @@ export default function JobDisplay() {
                                 </div>
                             </div>
                             <div className="prose dark:prose-invert max-w-none">
-                                <p>{selectedJob.fullDescription}</p>
+                                <p>{selectedJob.description}</p>
                             </div>
                         </div>
                     )}

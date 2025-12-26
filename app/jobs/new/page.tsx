@@ -106,40 +106,15 @@ export default function NewJobPage() {
         mode: "onBlur",
     });
 
-    async function ensureCompanyExists(name: string): Promise<number> {
-        // Check if the company already exists
-        const existing = companies.find(
-            (c) => c.name.toLowerCase() === name.toLowerCase()
-        );
-        if (existing) return existing.id;
-
-        // Create a new company
-        const res = await fetch("/api/companies", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...buildUserHeaders() },
-            body: JSON.stringify({ name }),
-        });
-
-        if (!res.ok) {
-            throw new Error("Failed to create company");
-        }
-
-        const newCompany = await res.json();
-        setCompanies((prev) => [...prev, newCompany]);
-        return newCompany.id;
-    }
-
     async function onSubmit(values: FormValues) {
         try {
             setLoading(true);
-
-            const companyId = await ensureCompanyExists(values.companyName);
 
             const res = await fetch("/api/jobs", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", ...buildUserHeaders() },
                 body: JSON.stringify({
-                    companyId,
+                    companyName: values.companyName,
                     title: values.title,
                     description: values.description,
                     location: values.location,

@@ -6,6 +6,7 @@ export type StoredUser = {
 };
 
 const STORAGE_KEY = "vizer.auth.user";
+export const AUTH_CHANGE_EVENT = "vizer.auth.change";
 
 export function loadStoredUser(): StoredUser | null {
   if (typeof window === "undefined") return null;
@@ -26,6 +27,7 @@ export function saveStoredUser(user: StoredUser) {
 
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
   } catch (error) {
     console.error("Failed to persist user", error);
   }
@@ -36,6 +38,7 @@ export function clearStoredUser() {
 
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
   } catch (error) {
     console.error("Failed to clear stored user", error);
   }
