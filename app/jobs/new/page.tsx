@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { buildUserHeaders } from "@/lib/auth-storage";
 
 const FormSchema = z.object({
     companyName: z.string().min(1, "Company name is required"),
@@ -50,7 +51,7 @@ export default function NewJobPage() {
             try {
                 const res = await fetch("/api/auth/me", {
                     method: "GET",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json", ...buildUserHeaders() },
                     cache: "no-store",
                 });
 
@@ -75,7 +76,9 @@ export default function NewJobPage() {
     useEffect(() => {
         async function loadCompanies() {
             try {
-                const res = await fetch("/api/companies");
+                const res = await fetch("/api/companies", {
+                    headers: buildUserHeaders(),
+                });
                 if (!res.ok) throw new Error("Failed to load companies");
                 const data = await res.json();
                 setCompanies(data);
@@ -113,7 +116,7 @@ export default function NewJobPage() {
         // Create a new company
         const res = await fetch("/api/companies", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", ...buildUserHeaders() },
             body: JSON.stringify({ name }),
         });
 
@@ -134,7 +137,7 @@ export default function NewJobPage() {
 
             const res = await fetch("/api/jobs", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json", ...buildUserHeaders() },
                 body: JSON.stringify({
                     companyId,
                     title: values.title,

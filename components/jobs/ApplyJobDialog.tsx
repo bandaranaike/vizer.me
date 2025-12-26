@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dialog";
 import {Toaster} from "@/components/ui/sonner";
 import {toast} from "sonner";
+import {buildUserHeaders} from "@/lib/auth-storage";
 const MAX_RESUME_BYTES = 5 * 1024 * 1024;
 
 const ResumeFileSchema = z
@@ -115,6 +116,7 @@ export default function ApplyJobDialog(
 
             const res = await fetch(applyUrl, {
                 method: "POST",
+                headers: buildUserHeaders(),
                 body: fd,
             });
 
