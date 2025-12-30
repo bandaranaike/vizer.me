@@ -44,12 +44,17 @@ export default function Navbar() {
 
     useEffect(() => {
         async function hydrateUser() {
+            const cachedUser = loadStoredUser();
+            if (!cachedUser) {
+                return;
+            }
+
             try {
                 const res = await fetch('/api/auth/me', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...buildUserHeaders(),
+                        ...buildUserHeaders(cachedUser),
                     },
                     cache: 'no-store',
                 });
