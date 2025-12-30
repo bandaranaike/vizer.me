@@ -61,10 +61,10 @@ export default function JobDisplay() {
                             'transition last:border-none first:rounded-tl-xl last:rounded-bl-xl',
                             selectedJob && selectedJob.id === job.id ? 'bg-gray-100 dark:bg-gray-700' : 'bg-white dark:bg-gray-900')}
                     >
-                        <div className="flex items-center gap-3">
-                            <img src={job.company.logo} alt="Logo" className="w-10 h-10 rounded-full"/>
+                        <div className="flex gap-3">
+                            <img src={job.company.logo} alt="Logo" className="w-10 h-10 rounded-full mt-1"/>
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{job.title}</h2>
+                                <h2 className="text-lg font-semibold text-gray-800 dark:text-white leading-6">{job.title}</h2>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">{job.company.name}</p>
                             </div>
                         </div>
@@ -88,14 +88,14 @@ export default function JobDisplay() {
             </div>
 
             {/* Job Description */}
-            <div className="w-2/3 p-6">
-                <div className="sticky top-6 max-h-screen overflow-y-auto pr-2">
+            <div className="w-2/3">
+                <div className="sticky top-6 py-7 px-6">
                     {selectedJob && (
                         <div className="text-gray-800 dark:text-white">
                             <div className="flex">
                                 <div className="grow">
                                     <h2 className="text-2xl font-bold mb-2">{selectedJob.title}</h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{selectedJob.company.name} • {selectedJob.company.address}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{selectedJob.company.name} • {selectedJob.company.address}</p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Posted {formatDistanceToNow(selectedJob.postedDate)} ago</p>
                                 </div>
                                 <div className="grow-0">
@@ -103,7 +103,7 @@ export default function JobDisplay() {
                                                     applyUrl={`/api/jobs/apply`}/>
                                 </div>
                             </div>
-                            <div className="prose dark:prose-invert max-w-none">
+                            <div className="prose dark:prose-invert max-w-none sticky overflow-y-auto">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                     {selectedJob.description || ""}
                                 </ReactMarkdown>

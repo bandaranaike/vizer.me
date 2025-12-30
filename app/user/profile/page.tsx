@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { debounce } from 'lodash'
 import axios from 'axios'
+import { buildUserHeaders, loadStoredUser, StoredUser } from "@/lib/auth-storage";
 
 const initialProfile = {
     name: '',
@@ -23,18 +24,41 @@ const initialProfile = {
 
 export default function ProfilePage() {
     const [profile, setProfile] = useState(initialProfile)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
-    // useEffect(() => {
-    //     axios.get('/api/user/profile')
-    //         .then(res => {
-    //             setProfile(res.data)
-    //             setLoading(false)
-    //         })
-    // }, [])
+    useEffect(() => {
+        const user = loadStoredUser()
+        if (user) {
+            // Pre-fill from local storage if available
+            setProfile(prev => ({
+                ...prev,
+                name: user.fullName || prev.name,
+                // email: user.email // email is not in the profile form currently
+            }))
+
+            axios.get('/api/user/profile', {
+                headers: buildUserHeaders(user)
+            })
+                .then(res => {
+                    setProfile(prev => ({ ...prev, ...res.data }))
+                })
+                .catch(err => {
+                    console.error("Failed to load profile", err)
+                })
+                .finally(() => {
+                    setLoading(false)
+                })
+        } else {
+            setLoading(false)
+        }
+    }, [])
 
     const saveProfile = debounce((data: typeof profile) => {
-        axios.put('/api/user/profile', data)
+        const user = loadStoredUser()
+        if (!user) return
+        axios.put('/api/user/profile', data, {
+            headers: buildUserHeaders(user)
+        })
     }, 400)
 
     const handleChange = (field: keyof typeof profile, value: string) => {

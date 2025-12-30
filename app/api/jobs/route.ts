@@ -50,6 +50,7 @@ export async function POST(req: Request) {
                         name: parsed.companyName,
                         ownerId: user.id,
                         logo: "company-logo.jpg",
+                        address: parsed.location || null,
                     },
                 }));
 
